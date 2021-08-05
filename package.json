@@ -1,0 +1,9 @@
+{
+    "name": "imageboard",
+    "version": "0.0.1",
+    "dependencies": {
+        "express": "^4.16.4",
+        "hbs": "^4.1.2",
+        "mongodb": "^3.1.0"
+    }
+}
