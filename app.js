@@ -1,9 +1,12 @@
 const express = require("express");
+const app = express();
 const hbs = require("hbs");
+const jsonParser = express.json();
 const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://localhost:27017/";
 const mongoClient = new MongoClient(url, { useUnifiedTopology: true });
-const app = express();
+
+const auth = require("auth.js")
 
 var siteName = "Imageboard";
 
@@ -13,9 +16,8 @@ hbs.registerPartials(__dirname + "/views/partials");
 app.use(express.static(__dirname+"/public", {extensions: ['html', 'htm','hbs']}));
 
 mongoClient.connect(function(err,client){
-    const db = client.db("usersdb");
-    const collection = db.collection("users");
-    
+    const usersDB = client.db("usersdb");
+    const usersCollection = usersDB.collection("users");
     if (err){
         return console.log(err);
     }
@@ -40,6 +42,13 @@ app.get("/boards", function(request, response){
         name: siteName,
         layout: "/layouts/layout"
     });
+});
+
+app.post("/register", jsonParser, function (request, response) {
+    if(!request.body) return response.sendStatus(400);
+    console.log(request.body.login);
+    if (ValidateEmail(request.body.login) && )
+    response.json(request.body);
 });
 
 app.use(function(req, res, next) {
