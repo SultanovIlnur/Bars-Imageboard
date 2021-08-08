@@ -52,9 +52,9 @@ app.post("/register", jsonParser, function (request, response) {
     console.log(request.body.login);
     if (auth.ValidateLogin(request.body.login) && !auth.ValidateEmail(request.body.login)){
         const collection = request.app.locals.collection;
-        if (collection.find({login: request.body.login})!= null && collection.find({email: request.body.email})!=null){
+        if (collection.find({login: request.body.login})!=null && collection.find({email: request.body.email})!=null){
             saltedPassword = auth.GenerateHash(request.body.password);
-            let userData = [{login: request.body.login, email: request.body.email, password: saltedPassword}];
+            let userData = [{login: request.body.login, email: request.body.email, password: saltedPassword, validatedEmail: false}];
             collection.insertMany(userData, function(err, result){
             if(err){ 
                 return console.log(err);
