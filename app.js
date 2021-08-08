@@ -47,6 +47,15 @@ app.get("/boards", function(request, response){
     });
 });
 
+app.get("/about", function(request, response){
+    response.render("boards.hbs",{
+        page: "Boards list",
+        name: siteName,
+        layout: "/layouts/layout"
+    });
+    //i should add here GET request or just request from db i suppose
+});
+
 app.post("/register", jsonParser, function (request, response) {
     if(!request.body) return response.sendStatus(400);
     console.log(request.body.login);
