@@ -68,7 +68,7 @@ app.post("/register", jsonParser, function (request, response) {
                     return console.log(err);
                 }
                 else{
-                    console.log("New user in DB created! Here the data: " + userData.toString());
+                    console.log("New user in DB created! Here the data: ", userData);
                 }
             });
             response.json(request.body);
