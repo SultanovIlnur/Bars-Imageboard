@@ -4,51 +4,48 @@ const hbs = require("hbs");
 const jsonParser = express.json();
 const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://localhost:27017/";
-const mongoClient = new MongoClient(url, { useUnifiedTopology: true });
+const mongoClient = new MongoClient(url, {useUnifiedTopology: true});
 
 const auth = require("./auth.js");
 
-var clientDatabase;
-
 var siteName = "Imageboard";
+var usersDB;
+
+mongoClient.connect(function (err, client) {
+    if(err) throw err;
+    usersDB = client.db("usersdb");
+    app.listen(3000);
+});
 
 app.set("view engine", "hbs");
 hbs.registerPartials(__dirname + "/views/partials");
 
-app.use(express.static(__dirname+"/public", {extensions: ['html', 'htm','hbs']}));
+app.use(express.static(__dirname + "/public", {
+    extensions: ['html', 'htm', 'hbs']
+}));
 
-mongoClient.connect(function(err,client){
-    clientDatabase = client;
-    const usersDB = client.db("usersdb");
-    const usersCollection = usersDB.collection("users");
-    if (err) return console.log(err);
-    app.locals.collection = client.db("usersdb").collection("users");
-    app.listen(4000, function(){});
-
-});
-
-app.get("/", function(request, response){
-    response.render("index.hbs",{
+app.get("/", function (request, response) {
+    response.render("index.hbs", {
         page: "Main",
         name: siteName,
         layout: "/layouts/layout"
     });
 });
 
-app.get("/index", function(request, response){
+app.get("/index", function (request, response) {
     response.redirect('/');
 });
 
-app.get("/boards", function(request, response){
-    response.render("boards.hbs",{
+app.get("/boards", function (request, response) {
+    response.render("boards.hbs", {
         page: "Boards list",
         name: siteName,
         layout: "/layouts/layout"
     });
 });
 
-app.get("/about", function(request, response){
-    response.render("boards.hbs",{
+app.get("/about", function (request, response) {
+    response.render("boards.hbs", {
         page: "Boards list",
         name: siteName,
         layout: "/layouts/layout"
@@ -56,36 +53,40 @@ app.get("/about", function(request, response){
     //i should add here GET request or just request from db i suppose
 });
 
-app.post("/register", jsonParser, function (request, response) {
-    if(!request.body) return response.sendStatus(400);
-    if (auth.ValidateLogin(request.body.login) && !auth.ValidateEmail(request.body.login) && !auth.ValidatePassword(request.body.password)){
-        const collection = request.app.locals.collection;
-        if (collection.find({login: request.body.login})!=null && collection.find({email: request.body.email})!=null){
-            saltedPassword = auth.GenerateHash(request.body.password);
-            let userData = [{login: request.body.login, email: request.body.email, password: saltedPassword, validatedEmail: false}];
-            collection.insertMany(userData, function(err, result){
-                if(err){ 
-                    return console.log(err);
-                }
-                else{
-                    console.log("New user in DB created! Here the data: ", userData);
-                }
-            });
-            response.json(request.body);
-        }
-    }
-    else{
+app.post("/register", jsonParser, async function (request, response) {
+    if (!request.body) return response.sendStatus(400);
+    if (auth.ValidateLogin(request.body.login) && auth.ValidateEmail(request.body.email) && auth.ValidatePassword(request.body.password)) {
+            const usersCollection = usersDB.collection("users");
+            if (!(await usersCollection.findOne({login: request.body.login})) && !(await usersCollection.findOne({email: request.body.email}))) {
+                saltedPassword = await auth.GenerateHash(request.body.password);
+                console.log(saltedPassword);
+                let userData = [{
+                    login: request.body.login,
+                    email: request.body.email,
+                    password: saltedPassword,
+                    validatedEmail: false
+                }];
+                usersCollection.insertMany(userData, function (err, result) {
+                    if (err) {
+                        return console.log(err);
+                    } else {
+                        console.log("New user in DB created! Here the data: ", userData);
+                    }
+                });
+                response.json(request.body);
+            }
+    } else {
         response.json("Not validated field!");
     }
 });
 
-app.use(function(req, res, next) {
-    res.status(404).sendFile(__dirname+"/public/404.html");
-  });
+app.use(function (req, res, next) {
+    res.status(404).sendFile(__dirname + "/public/404.html");
+});
 
 app.listen(8080);
 
 process.on("SIGINT", () => {
-    clientDatabase.close();
+    dbClient.close();
     process.exit();
 });
