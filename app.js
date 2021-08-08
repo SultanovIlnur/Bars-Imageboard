@@ -48,6 +48,9 @@ app.post("/register", jsonParser, function (request, response) {
     if(!request.body) return response.sendStatus(400);
     console.log(request.body.login);
     if (auth.ValidateName && auth.ValidateEmail(request.body.login)){
+        saltedPassword = auth.GenerateHash(request.body.password);
+        let userData = [{login: request.body.login, email: request.body.email, password: saltedPassword}];
+        usersCollection.insertOne(users, function(err, results){
         response.json(request.body);
     }
     else{
