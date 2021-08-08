@@ -47,8 +47,9 @@ app.get("/boards", function(request, response){
 app.post("/register", jsonParser, function (request, response) {
     if(!request.body) return response.sendStatus(400);
     console.log(request.body.login);
-    if (ValidateEmail(request.body.login) && )
-    response.json(request.body);
+    if (auth.ValidateName && auth.ValidateEmail(request.body.login)){
+        response.json(request.body);
+    }
 });
 
 app.use(function(req, res, next) {
