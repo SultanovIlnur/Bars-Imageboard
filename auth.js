@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 
 function ValidateLogin(name) {
-    const re = /^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){6,18}[a-zA-Z0-9]$/;
+    const re = /^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$/;
     return re.test(name);
 }
 function ValidateEmail(email) {
@@ -10,6 +10,7 @@ function ValidateEmail(email) {
 }
 
 function GenerateHash(password){
+    let saltRounds = 10;
     bcrypt.genSalt(saltRounds, function(err, salt) {
         bcrypt.hash(password, salt, function(err, hash) {
             return hash;

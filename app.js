@@ -22,10 +22,8 @@ mongoClient.connect(function(err,client){
     const usersDB = client.db("usersdb");
     const usersCollection = usersDB.collection("users");
     if (err) return console.log(err);
-    //app.locals.collection = client.db("usersdb").collection("users"); would be useful in the future
-    app.listen(4000, function(){
-
-    });
+    app.locals.collection = client.db("usersdb").collection("users");
+    app.listen(4000, function(){});
 
 });
 
@@ -53,10 +51,11 @@ app.post("/register", jsonParser, function (request, response) {
     if(!request.body) return response.sendStatus(400);
     console.log(request.body.login);
     if (auth.ValidateLogin(request.body.login) && !auth.ValidateEmail(request.body.login)){
-        if (!usersCollection.findOne({login: request.body.login}) && !usersCollection.findOne({email: request.body.email})){
+        const collection = request.app.locals.collection;
+        if (collection.find({login: request.body.login})!= null && collection.find({email: request.body.email})!=null){
             saltedPassword = auth.GenerateHash(request.body.password);
             let userData = [{login: request.body.login, email: request.body.email, password: saltedPassword}];
-            usersCollection.insertOne(userData, function(err, result){
+            collection.insertMany(userData, function(err, result){
             if(err){ 
                 return console.log(err);
             }
