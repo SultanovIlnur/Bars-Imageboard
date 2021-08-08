@@ -58,7 +58,7 @@ app.get("/about", function(request, response){
 
 app.post("/register", jsonParser, function (request, response) {
     if(!request.body) return response.sendStatus(400);
-    if (auth.ValidateLogin(request.body.login) && !auth.ValidateEmail(request.body.login)){
+    if (auth.ValidateLogin(request.body.login) && !auth.ValidateEmail(request.body.login) && !auth.ValidatePassword(request.body.password)){
         const collection = request.app.locals.collection;
         if (collection.find({login: request.body.login})!=null && collection.find({email: request.body.email})!=null){
             saltedPassword = auth.GenerateHash(request.body.password);

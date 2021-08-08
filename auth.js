@@ -8,6 +8,10 @@ function ValidateEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 }
+function ValidatePassword(password) {
+    const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+    return re.test(password);
+}
 
 function GenerateHash(password){
     let saltRounds = 10;
@@ -20,3 +24,4 @@ function GenerateHash(password){
 exports.GenerateHash = GenerateHash;
 exports.ValidateLogin = ValidateLogin;
 exports.ValidateEmail = ValidateEmail;
+exports.ValidatePassword = ValidatePassword;
