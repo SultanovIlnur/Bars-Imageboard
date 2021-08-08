@@ -6,7 +6,7 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://localhost:27017/";
 const mongoClient = new MongoClient(url, { useUnifiedTopology: true });
 
-const auth = require("auth.js")
+const auth = require("./auth.js");
 
 var siteName = "Imageboard";
 
@@ -47,10 +47,17 @@ app.get("/boards", function(request, response){
 app.post("/register", jsonParser, function (request, response) {
     if(!request.body) return response.sendStatus(400);
     console.log(request.body.login);
-    if (auth.ValidateName && auth.ValidateEmail(request.body.login)){
+    if (auth.ValidateLogin(request.body.login) && auth.ValidateEmail(request.body.login)){
         saltedPassword = auth.GenerateHash(request.body.password);
+        const usersDB = client.db("usersdb");
+        const usersCollection = usersDB.collection("users");
         let userData = [{login: request.body.login, email: request.body.email, password: saltedPassword}];
-        usersCollection.insertOne(users, function(err, results){
+        usersCollection.insertOne(userData, function(err, result){
+            if(err){ 
+                return console.log(err);
+            }
+            client.close();
+        });
         response.json(request.body);
     }
     else{
