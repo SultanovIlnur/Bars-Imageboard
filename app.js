@@ -50,6 +50,9 @@ app.post("/register", jsonParser, function (request, response) {
     if (auth.ValidateName && auth.ValidateEmail(request.body.login)){
         response.json(request.body);
     }
+    else{
+        response.json("Not validated field!");
+    }
 });
 
 app.use(function(req, res, next) {
