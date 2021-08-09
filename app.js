@@ -6,13 +6,19 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://localhost:27017/";
 const mongoClient = new MongoClient(url, {useUnifiedTopology: true});
 const session = require('express-session');
-const LocalStrategy  = require('passport-local').Strategy;
-const bodyParser = require("body-parser");
 
 const auth = require("./auth.js");
 
 var siteName = "Imageboard";
 var usersDB;
+
+app.set('trust proxy', 1)
+app.use(session({
+  secret: 'wgltg1sqq425',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}))
 
 mongoClient.connect(function (err, client) {
     if(err) throw err;
@@ -77,9 +83,10 @@ app.post("/register", jsonParser, async function (request, response) {
                         return console.log(err);
                     } else {
                         console.log("New user in DB created! Here the data: ", userData);
+                        response.redirect("/");
                     }
                 });
-                response.redirect('/');
+                
             }
     } else {
         response.json("Not validated field!");
@@ -90,7 +97,7 @@ app.post("/signin", jsonParser, async function(request, response){
     if (!request.body) return response.sendStatus(400);
     if (auth.ValidateLogin(request.body.login) && auth.ValidatePassword(request.body.password)) {
         const usersCollection = usersDB.collection("users");
-        console.log(await usersCollection.find({login: request.body.login}).toArray()[0].password);
+        console.log(await usersCollection.find({login: request.body.login}).toArray().password);
         if (!(await usersCollection.findOne({login: request.body.login})) && await auth.ComparePassword(usersCollection.find({login: request.body.login}).toArray()["password"], request.body.password)) {
             usersCollection.insertMany(userData, function (err, result) {
                 if (err) {
@@ -99,7 +106,6 @@ app.post("/signin", jsonParser, async function(request, response){
                     console.log("User just logged! Here his login: ", request.body.login);
                 }
             });
-            response.json(request.body);
         }
 } else {
     response.json("Not validated field!");

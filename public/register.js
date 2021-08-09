@@ -31,7 +31,8 @@ $(document).ready(function(){
         let req = new XMLHttpRequest();
         req.open("POST", "/register", true);
         req.setRequestHeader("Content-Type", "application/json");
-    
+        req.addEventListener("load", function () {
+        });
         req.send(dataToSend);
     });
 });
