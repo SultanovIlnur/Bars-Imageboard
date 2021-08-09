@@ -9,7 +9,7 @@ $(document).ready(function(){
             password: password
         });
         let req = new XMLHttpRequest();
-        req.open("POST", "/login", true);
+        req.open("POST", "/signin", true);
         req.setRequestHeader("Content-Type", "application/json");
         req.send(dataToSend);
     });

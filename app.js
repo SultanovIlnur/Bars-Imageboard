@@ -6,7 +6,6 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://localhost:27017/";
 const mongoClient = new MongoClient(url, {useUnifiedTopology: true});
 const session = require('express-session');
-const passport = require('passport');
 const LocalStrategy  = require('passport-local').Strategy;
 const bodyParser = require("body-parser");
 
@@ -14,23 +13,6 @@ const auth = require("./auth.js");
 
 var siteName = "Imageboard";
 var usersDB;
-
-app.use(express.static("public"));
-app.use(session({ secret: "agaglaglag;" }));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.use(new LocalStrategy(
-    function(login, password, done) {
-        usersCollection.findOne({ login: login }, function (err, user) {
-        if (err) { return done(err); }
-        if (!user) { return done(null, false); }
-        if (!user.validPassword(password)) { return done(null, false); }
-        return done(null, user);
-      });
-    }
-  ));
 
 mongoClient.connect(function (err, client) {
     if(err) throw err;
@@ -95,32 +77,26 @@ app.post("/register", jsonParser, async function (request, response) {
                         return console.log(err);
                     } else {
                         console.log("New user in DB created! Here the data: ", userData);
-                        passport.authenticate("local")(request, response, function(){
-                            response.redirect("/login");
-                        });
                     }
                 });
-                response.json("DS");
+                response.redirect('/');
             }
     } else {
         response.json("Not validated field!");
     }
 });
 
-app.post("/login", jsonParser, async function(request, response){
+app.post("/signin", jsonParser, async function(request, response){
     if (!request.body) return response.sendStatus(400);
     if (auth.ValidateLogin(request.body.login) && auth.ValidatePassword(request.body.password)) {
         const usersCollection = usersDB.collection("users");
-        console.log(usersCollection.find({login: request.body.login}).toArray()["password"]);
+        console.log(await usersCollection.find({login: request.body.login}).toArray()[0].password);
         if (!(await usersCollection.findOne({login: request.body.login})) && await auth.ComparePassword(usersCollection.find({login: request.body.login}).toArray()["password"], request.body.password)) {
             usersCollection.insertMany(userData, function (err, result) {
                 if (err) {
                     return console.log(err);
                 } else {
                     console.log("User just logged! Here his login: ", request.body.login);
-                    passport.authenticate("local")(request, response, function(){
-                        response.redirect("/login");
-                    });
                 }
             });
             response.json(request.body);
@@ -128,9 +104,6 @@ app.post("/login", jsonParser, async function(request, response){
 } else {
     response.json("Not validated field!");
 }
-    passport.authenticate('local'),
-    { successRedirect: '/',
-    failureRedirect: '/login' }
 });
 
 app.get("/profile", function(request, response){
@@ -153,12 +126,7 @@ app.use(function (req, res, next) {
 
 app.listen(8080);
 
-function isLogged(req,res,next) {
-    if(req.isAuthenticated()){
-        return next();
-    }
-    res.redirect("/login");
-}
+
 
 process.on("SIGINT", () => {
     dbClient.close();
