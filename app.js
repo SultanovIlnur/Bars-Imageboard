@@ -95,23 +95,30 @@ app.post("/register", jsonParser, async function (request, response) {
 
 app.post("/signin", jsonParser, async function(request, response){
     if (!request.body) return response.sendStatus(400);
+    console.log(request.body.login);
     if (auth.ValidateLogin(request.body.login) && auth.ValidatePassword(request.body.password)) {
         const usersCollection = usersDB.collection("users");
         var currUser = await usersCollection.find({login: request.body.login}).toArray();
-        if (!(await usersCollection.findOne({login: request.body.login})) && await auth.ComparePassword(currUser[0].password, request.body.password)) {
-            usersCollection.insertMany(userData, function (err, result) {
-                if (err) {
-                    return console.log(err);
-                } else {
-                    console.log("User just logged! Here his login: ", request.body.login);
-                    res.status(201).json({message: "register", status: 201});
-                }
-            });
+        if (!(await usersCollection.findOne({login: request.body.login}))){
+            if(await auth.ComparePassword(currUser[0].password, request.body.password)){
+                
+                usersCollection.insertMany(userData, function (err, result) {
+                    if (err) {
+                        return console.log(err);
+                    } else {
+                        console.log("User just logged! Here his login: ", request.body.login);
+                        response.status(201).json({message: "signedin", status: 201});
+                    }
+                });
+            }
+            else{
+                response.status(401).json({error: "invalidpassword", status: 401});
+            }
         }
-} else {
-    response.json({error: "1"});
-}
-response.redirect('/about');
+        else{
+            response.status(401).json({error: "invalidlogin", status: 401});
+        }
+};
 });
 
 app.get("/profile", function(request, response){
