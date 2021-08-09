@@ -33,8 +33,8 @@ $(document).ready(function(){
         req.setRequestHeader("Content-Type", "application/json");
         req.addEventListener("load", function () {
             let receivedJSON = JSON.parse(req.response);
-            if (receivedJSON.message == "registered"){
-                location.href = '/login';
+            if (receivedJSON.status == 201){
+                location.href = '/signin';
             }
         });
         req.send(dataToSend);
