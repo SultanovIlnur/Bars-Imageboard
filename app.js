@@ -6,19 +6,26 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://localhost:27017/";
 const mongoClient = new MongoClient(url, {useUnifiedTopology: true});
 const session = require('express-session');
+const cookie = require('cookie-parser');
 
 const auth = require("./auth.js");
 
 var siteName = "Imageboard";
+const port = 8080;
+const secretKey = "ggjieqfsgjagsgwwsyh44yhgswgaqfva";
 var usersDB;
 
+const week = 1000 * 60 * 60 * 24 * 7;
+
 app.set('trust proxy', 1)
-app.use(session({
-  secret: 'wgltg1sqq425',
+app.use(sessions({
+  secret: secretKey,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }
-}))
+  cookie: { maxAge: week}
+}));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
 
 mongoClient.connect(function (err, client) {
     if(err) throw err;
@@ -139,7 +146,7 @@ app.use(function (req, res, next) {
     res.status(404).sendFile(__dirname + "/public/404.html");
 });
 
-app.listen(8080);
+app.listen(port);
 
 
 
