@@ -100,7 +100,7 @@ app.post("/register", jsonParser, async function (request, response) {
                         });
                     }
                 });
-                response.json(request.body);
+                response.json("DS");
             }
     } else {
         response.json("Not validated field!");
@@ -111,12 +111,13 @@ app.post("/login", jsonParser, async function(request, response){
     if (!request.body) return response.sendStatus(400);
     if (auth.ValidateLogin(request.body.login) && auth.ValidatePassword(request.body.password)) {
         const usersCollection = usersDB.collection("users");
-        if (!(await usersCollection.findOne({login: request.body.login})) && await auth.ComparePassword(usersCollection.findOne({login: request.body.login}), request.body.password)) {
+        console.log(usersCollection.find({login: request.body.login}).toArray()["password"]);
+        if (!(await usersCollection.findOne({login: request.body.login})) && await auth.ComparePassword(usersCollection.find({login: request.body.login}).toArray()["password"], request.body.password)) {
             usersCollection.insertMany(userData, function (err, result) {
                 if (err) {
                     return console.log(err);
                 } else {
-                    console.log("New user in DB created! Here the data: ", userData);
+                    console.log("User just logged! Here his login: ", request.body.login);
                     passport.authenticate("local")(request, response, function(){
                         response.redirect("/login");
                     });

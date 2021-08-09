@@ -33,3 +33,4 @@ exports.ValidateLogin = ValidateLogin;
 exports.ValidateEmail = ValidateEmail;
 exports.ValidatePassword = ValidatePassword;
 exports.GenerateHash = GenerateHash;
+exports.ComparePassword = ComparePassword;
