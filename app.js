@@ -33,6 +33,8 @@ mongoClient.connect(function (err, client) {
     app.listen(3000);
 });
 
+var session;
+
 //routes
 
 app.set("view engine", "hbs");
@@ -113,6 +115,8 @@ app.post("/signin", jsonParser, async function(request, response){
                     if (err) {
                         return console.log(err);
                     } else {
+                        session=request.session;
+                        session.userid=req.body.username;
                         console.log("User just logged! Here his login: ", request.body.login);
                         response.status(201).json({message: "signedin", status: 201});
                     }
@@ -136,14 +140,14 @@ app.get("/profile", function(request, response){
     });
 });
 
-app.get("/logout", function (req,res){
-    req.logout();
-    res.redirect("/");
+app.get("/logout", function (request,response){
+    request.session.destroy();
+    response.redirect("/");
     
 });
 
-app.use(function (req, res, next) {
-    res.status(404).sendFile(__dirname + "/public/404.html");
+app.use(function (request, response, next) {
+    response.status(404).sendFile(__dirname + "/public/404.html");
 });
 
 app.listen(port);
