@@ -17,12 +17,18 @@ function ValidatePassword(password) {
 
 async function GenerateHash(password){
     let saltRounds = 10;
-    //bcrypt.hash(password, saltRounds, function(err, hash){
-    //    console.log("salted pass", hash);
-    //    return hash;
-    //});
     return hash = await bcrypt.hash(password, saltRounds);
 }
+
+async function ComparePassword(hash, password){
+    bcrypt.compare(hash, password, function(err, isMatch) {
+    if (err) {
+      return false;
+    }
+    return true;
+  });
+}
+
 exports.ValidateLogin = ValidateLogin;
 exports.ValidateEmail = ValidateEmail;
 exports.ValidatePassword = ValidatePassword;

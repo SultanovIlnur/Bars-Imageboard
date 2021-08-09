@@ -23,10 +23,10 @@ app.use(passport.session());
 
 passport.use(new LocalStrategy(
     function(login, password, done) {
-      User.findOne({ login: login }, function (err, user) {
+        usersCollection.findOne({ login: login }, function (err, user) {
         if (err) { return done(err); }
         if (!user) { return done(null, false); }
-        if (!user.verifyPassword(password)) { return done(null, false); }
+        if (!user.validPassword(password)) { return done(null, false); }
         return done(null, user);
       });
     }
@@ -95,6 +95,9 @@ app.post("/register", jsonParser, async function (request, response) {
                         return console.log(err);
                     } else {
                         console.log("New user in DB created! Here the data: ", userData);
+                        passport.authenticate("local")(request, response, function(){
+                            response.redirect("/login");
+                        });
                     }
                 });
                 response.json(request.body);
@@ -105,6 +108,25 @@ app.post("/register", jsonParser, async function (request, response) {
 });
 
 app.post("/login", jsonParser, async function(request, response){
+    if (!request.body) return response.sendStatus(400);
+    if (auth.ValidateLogin(request.body.login) && auth.ValidatePassword(request.body.password)) {
+        const usersCollection = usersDB.collection("users");
+        if (!(await usersCollection.findOne({login: request.body.login})) && await auth.ComparePassword(usersCollection.findOne({login: request.body.login}), request.body.password)) {
+            usersCollection.insertMany(userData, function (err, result) {
+                if (err) {
+                    return console.log(err);
+                } else {
+                    console.log("New user in DB created! Here the data: ", userData);
+                    passport.authenticate("local")(request, response, function(){
+                        response.redirect("/login");
+                    });
+                }
+            });
+            response.json(request.body);
+        }
+} else {
+    response.json("Not validated field!");
+}
     passport.authenticate('local'),
     { successRedirect: '/',
     failureRedirect: '/login' }
@@ -121,6 +143,7 @@ app.get("/profile", function(request, response){
 app.get("/logout", function (req,res){
     req.logout();
     res.redirect("/");
+    
 });
 
 app.use(function (req, res, next) {
@@ -129,6 +152,12 @@ app.use(function (req, res, next) {
 
 app.listen(8080);
 
+function isLogged(req,res,next) {
+    if(req.isAuthenticated()){
+        return next();
+    }
+    res.redirect("/login");
+}
 
 process.on("SIGINT", () => {
     dbClient.close();
