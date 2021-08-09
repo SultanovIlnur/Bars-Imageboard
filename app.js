@@ -5,7 +5,7 @@ const jsonParser = express.json();
 const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://localhost:27017/";
 const mongoClient = new MongoClient(url, {useUnifiedTopology: true});
-const session = require('express-session');
+const sessions = require('express-session');
 const cookie = require('cookie-parser');
 
 const auth = require("./auth.js");
@@ -26,6 +26,7 @@ app.use(sessions({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
+app.use(cookie());
 
 mongoClient.connect(function (err, client) {
     if(err) throw err;
@@ -99,6 +100,12 @@ app.post("/register", jsonParser, async function (request, response) {
             }
     } else {
         response.json("Not validated field!");
+    }
+});
+
+app.get("/signin", function(request, response){
+    if (session.userid){
+        response.redirect("/profile");
     }
 });
 

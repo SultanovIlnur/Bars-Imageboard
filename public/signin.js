@@ -14,13 +14,10 @@ $(document).ready(function(){
         req.addEventListener("load", function () {
             let receivedJSON = JSON.parse(req.response);
             if (receivedJSON.status == 201){
-                location.href = '/index';
+                document.location.href = '/index';
             }
-            if (receivedJSON.status == 401){
-                //$("").append("");
-                var alertNode = document.querySelector('.alert');
-                var alert = bootstrap.Alert.getInstance(alertNode);
-            }
+            //if (receivedJSON.status == 401){
+            //}
         req.send(dataToSend);
     });
 });

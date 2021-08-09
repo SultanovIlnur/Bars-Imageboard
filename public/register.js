@@ -34,7 +34,7 @@ $(document).ready(function(){
         req.addEventListener("load", function () {
             let receivedJSON = JSON.parse(req.response);
             if (receivedJSON.status == 201){
-                location.href = '/signin';
+                document.location.href = '/signin';
             }
         });
         req.send(dataToSend);
