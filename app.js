@@ -83,7 +83,7 @@ app.post("/register", jsonParser, async function (request, response) {
                         return console.log(err);
                     } else {
                         console.log("New user in DB created! Here the data: ", userData);
-                        response.status(201).json({message: "register", status: 201});
+                        response.status(201).json({message: "registered", status: 201});
                     }
                 });
                 

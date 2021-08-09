@@ -12,7 +12,10 @@ $(document).ready(function(){
         req.open("POST", "/signin", true);
         req.setRequestHeader("Content-Type", "application/json");
         req.addEventListener("load", function () {
-         });
+            let receivedJSON = JSON.parse(req.response);
+            if (receivedJSON.message == "signedin"){
+                location.href = '/index';
+            }
         req.send(dataToSend);
     });
 });

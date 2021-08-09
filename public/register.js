@@ -32,6 +32,10 @@ $(document).ready(function(){
         req.open("POST", "/register", true);
         req.setRequestHeader("Content-Type", "application/json");
         req.addEventListener("load", function () {
+            let receivedJSON = JSON.parse(req.response);
+            if (receivedJSON.message == "registered"){
+                location.href = '/login';
+            }
         });
         req.send(dataToSend);
     });
