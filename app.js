@@ -58,12 +58,12 @@ app.post("/register", jsonParser, async function (request, response) {
     if (auth.ValidateLogin(request.body.login) && auth.ValidateEmail(request.body.email) && auth.ValidatePassword(request.body.password)) {
             const usersCollection = usersDB.collection("users");
             if (!(await usersCollection.findOne({login: request.body.login})) && !(await usersCollection.findOne({email: request.body.email}))) {
-                saltedPassword = await auth.GenerateHash(request.body.password);
+                let saltedPassword = await auth.GenerateHash(request.body.password);
                 console.log(saltedPassword);
                 let userData = [{
                     login: request.body.login,
                     email: request.body.email,
-                    password: saltedPassword,
+                    password: await saltedPassword,
                     validatedEmail: false
                 }];
                 usersCollection.insertMany(userData, function (err, result) {
